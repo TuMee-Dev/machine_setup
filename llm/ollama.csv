@@ -1,0 +1,52 @@
+category,model_name,minimum_memory,minimum_disk,description
+
+# Small Models (≤10GB)
+Small,qwen2.5:7b,8gb,256gb,"Exceptional multilingual reasoning, coding (~4.7GB)"
+Small,llama3.2:3b,8gb,256gb,"Meta's latest small model, surprisingly capable (~2GB)"
+Small,mistral:7b,8gb,256gb,"Reliable general-purpose model (~4.1GB)"
+Small,gemma2:9b,16gb,256gb,"Google's efficient model, strong performance (~5.4GB)"
+Small,llama3.1:8b,16gb,256gb,"Solid all-arounder with tool support (~4.7GB)"
+
+# Medium Models (10–20GB)
+Medium,phi4:14b,32gb,512gb,"Microsoft's SOTA small model, excellent reasoning (~8GB)"
+Medium,qwen2.5:14b,32gb,512gb,"Sweet spot for quality/size (~9GB)"
+Medium,deepseek-r1:14b,32gb,512gb,"Excellent reasoning model (~9GB)"
+Medium,qwen2.5-coder:14b,32gb,512gb,"Best coding model under 20GB (~9GB)"
+Medium,deepseek-coder-v2:16b,32gb,512gb,"Efficient coding model (~9GB)"
+
+# Large Models (20–50GB)
+Large,qwen2.5:32b,48gb,1tb,"Very capable, still efficient (~20GB)"
+Large,qwen3:32b,48gb,1tb,"Latest generation (~20GB)"
+Large,qwq:32b,48gb,1tb,"Reasoning specialist (~20GB)"
+Large,llava:34b,48gb,1tb,"Vision-language multimodal (~20GB)"
+Large,qwen3-vl:32b,48gb,1tb,"State-of-the-art vision-language (~20GB)"
+Large,codellama:34b,48gb,1tb,"Top-tier coding (~19GB)"
+Large,gemma2:27b,48gb,1tb,"High quality (~16GB)"
+
+# XL Models (50–80GB)
+XL,llama3.1:70b,64gb,2tb,"Near GPT-4 quality (~40GB)"
+XL,llama3.3:70b,64gb,2tb,"Matches llama3.1:405b performance (~40GB)"
+XL,deepseek-r1:70b,96gb,2tb,"Outstanding reasoning (~40GB)"
+XL,qwen2.5:72b,96gb,2tb,"Excellent multilingual + reasoning (~43GB)"
+
+# XXL / MoE Models (80GB+)
+XXL,mixtral:8x22b,96gb,2tb,"MoE architecture, extremely powerful (~80GB)"
+XXL,mistral-large:123b,96gb,2tb,"Mistral's flagship (~70GB)"
+XXL,command-r-plus:104b,96gb,2tb,"Enterprise-grade RAG model (~60GB)"
+
+# Vision Models
+Vision,llava:34b,48gb,1tb,"Multimodal vision-language (~20GB)"
+Vision,qwen3-vl:32b,48gb,1tb,"State-of-the-art vision-language (~20GB)"
+
+# Coding Models
+Coding,qwen2.5-coder:14b,32gb,512gb,"Best coding model under 20GB (~9GB)"
+Coding,deepseek-coder-v2:16b,32gb,512gb,"Efficient coding model (~9GB)"
+Coding,codellama:34b,48gb,1tb,"Top-tier coding (~19GB)"
+Coding,qwen2.5-coder:32b,48gb,1tb,"Elite large coding model (~20GB)"
+
+# Reasoning Models
+Reasoning,phi4:14b,32gb,512gb,"Microsoft reasoning specialist (~8GB)"
+Reasoning,deepseek-r1:14b,32gb,512gb,"Small high-quality R1 variant (~9GB)"
+Reasoning,deepseek-r1:70b,96gb,2tb,"Near-O3 performance (~40GB)"
+Reasoning,qwq:32b,48gb,1tb,"Reasoning specialist (~20GB)"
+Reasoning,llama3.3:70b,96gb,2tb,"Top reasoning pick for 96GB Mac (~40GB)"
