@@ -113,7 +113,7 @@ verify_system_requirements() {
             [[ -n "$reasons" ]] && reasons="${reasons}, " || reasons=""
             reasons="${reasons}Disk: ${system_disk_gb}/${required_disk_gb}GB"
         fi
-        log_warning "Skipping $model_name ($reasons)" >&2
+        log_info "Skipping $model_name ($reasons)" >&2
         return 1
     fi
 }
