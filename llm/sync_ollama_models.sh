@@ -2,6 +2,10 @@
 
 set -eo pipefail
 
+# Set OLLAMA_DOWNLOAD_CONN to core count for optimal download performance
+CORE_COUNT=$(sysctl -n hw.ncpu)
+export OLLAMA_DOWNLOAD_CONN=$CORE_COUNT
+
 CSV_FILE="ollama.csv"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CSV_PATH="${SCRIPT_DIR}/${CSV_FILE}"
@@ -272,6 +276,7 @@ main() {
 
     log_info "Ollama Model Sync Script"
     log_info "========================"
+    log_info "OLLAMA_DOWNLOAD_CONN set to: $OLLAMA_DOWNLOAD_CONN concurrent connections"
     echo ""
 
     # Check if CSV exists
