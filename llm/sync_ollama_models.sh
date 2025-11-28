@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/zsh
 
 set -eo pipefail
 
 CSV_FILE="ollama.csv"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CSV_PATH="${SCRIPT_DIR}/${CSV_FILE}"
 
 # Color output
@@ -35,8 +35,8 @@ parse_size_to_gb() {
     size_str=$(echo "$size_str" | tr '[:upper:]' '[:lower:]')
 
     if [[ $size_str =~ ^([0-9]+)(gb|tb)$ ]]; then
-        local value="${BASH_REMATCH[1]}"
-        local unit="${BASH_REMATCH[2]}"
+        local value="${match[1]}"
+        local unit="${match[2]}"
 
         if [[ "$unit" == "tb" ]]; then
             echo $((value * 1024))
@@ -55,13 +55,21 @@ get_system_ram_gb() {
 }
 
 # Get base disk size in GB (total capacity, not used space)
+# Rounds up to nearest 128GB increment (Apple's common disk sizes)
 get_base_disk_size_gb() {
     local disk_info=$(diskutil info / | grep -i "Disk Size" | head -1)
+    local raw_size=0
+
     if [[ $disk_info =~ ([0-9.]+)\ TB ]]; then
-        local tb_value="${BASH_REMATCH[1]}"
-        printf "%.0f" "$(echo "$tb_value * 1024" | bc)"
+        local tb_value="${match[1]}"
+        raw_size=$(printf "%.0f" "$(echo "$tb_value * 1024" | bc)")
     elif [[ $disk_info =~ ([0-9.]+)\ GB ]]; then
-        printf "%.0f" "${BASH_REMATCH[1]}"
+        raw_size=$(printf "%.0f" "${match[1]}")
+    fi
+
+    # Round up to nearest 128GB
+    if [[ $raw_size -gt 0 ]]; then
+        echo $(( ((raw_size + 127) / 128) * 128 ))
     else
         echo "0"
     fi
@@ -99,9 +107,13 @@ verify_system_requirements() {
     if [[ "$ram_ok" == true && "$disk_ok" == true ]]; then
         return 0
     else
-        log_warning "System does not meet requirements for model: $model_name"
-        [[ "$ram_ok" == false ]] && log_warning "  RAM: ${system_ram_gb}GB < ${required_ram_gb}GB required"
-        [[ "$disk_ok" == false ]] && log_warning "  Disk: ${system_disk_gb}GB < ${required_disk_gb}GB required"
+        local reasons=""
+        [[ "$ram_ok" == false ]] && reasons="RAM: ${system_ram_gb}/${required_ram_gb}GB"
+        if [[ "$disk_ok" == false ]]; then
+            [[ -n "$reasons" ]] && reasons="${reasons}, " || reasons=""
+            reasons="${reasons}Disk: ${system_disk_gb}/${required_disk_gb}GB"
+        fi
+        log_warning "Skipping $model_name ($reasons)" >&2
         return 1
     fi
 }
@@ -147,6 +159,7 @@ pull_model_with_retry() {
 # Parse CSV and return list of eligible models
 get_eligible_models() {
     local -a models=()
+    typeset -A seen_models  # Track unique models to avoid duplicates
 
     while IFS=, read -r category model_name min_memory min_disk description; do
         # Skip comments, empty lines, and header
@@ -154,9 +167,13 @@ get_eligible_models() {
         [[ -z "$category" ]] && continue
         [[ "$category" == "category" ]] && continue
 
+        # Skip if we've already seen this model
+        [[ -n "${seen_models[$model_name]}" ]] && continue
+
         # Verify system requirements
         if verify_system_requirements "$min_memory" "$min_disk" "$model_name"; then
             models+=("$model_name|$min_disk")
+            seen_models[$model_name]=1
         fi
     done < "$CSV_PATH"
 
@@ -291,7 +308,6 @@ main() {
 
     local model_count=$(echo "$eligible_models" | wc -l | tr -d ' ')
     log_info "Found $model_count eligible model(s) for this system"
-    echo ""
 
     # Download models
     local downloaded_count=0
@@ -301,10 +317,10 @@ main() {
         [[ -z "$model_name" ]] && continue
         if is_model_downloaded "$model_name"; then
             log_success "Already downloaded: $model_name"
-            ((skipped_count++))
+            skipped_count=$((skipped_count + 1))
         else
             pull_model_with_retry "$model_name" "$min_disk"
-            ((downloaded_count++))
+            downloaded_count=$((downloaded_count + 1))
         fi
     done <<< "$eligible_models"
 
