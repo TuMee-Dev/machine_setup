@@ -9,7 +9,7 @@ Small,llama3.1:8b,16gb,256gb,"Solid all-arounder with tool support (~4.7GB)"
 ,,,,
 #,#,#,#,# Medium Models (10–20GB)
 Medium,phi4:14b,24gb,512gb,"Microsoft's SOTA small model, excellent reasoning (~8GB)"
-Medium,qwen2.5:14b,24b,512gb,"Sweet spot for quality/size (~9GB)"
+Medium,qwen2.5:14b,24gb,512gb,"Sweet spot for quality/size (~9GB)"
 Medium,deepseek-r1:14b,24gb,512gb,"Excellent reasoning model (~9GB)"
 Medium,qwen2.5-coder:14b,24gb,512gb,"Best coding model under 20GB (~9GB)"
 Medium,deepseek-coder-v2:16b,24gb,512gb,"Efficient coding model (~9GB)"
