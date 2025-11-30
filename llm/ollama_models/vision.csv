@@ -1,0 +1,3 @@
+model_name,minimum_memory,minimum_disk,description
+qwen3-vl:32b,48gb,1tb,"State-of-the-art vision-language (~20GB)"
+llama4:scout,96gb,2tb,"Native multimodal image+text (~67GB)"

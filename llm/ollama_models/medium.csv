@@ -1,0 +1,9 @@
+model_name,minimum_memory,minimum_disk,description
+phi4:14b,24gb,512gb,"Microsoft's SOTA small model, excellent reasoning (~8GB)"
+cogito:14b,24gb,512gb,"Hybrid reasoning specialist (~9GB)"
+qwen2.5:14b,24gb,512gb,"Sweet spot for quality/size (~9GB)"
+qwen3:14b,24gb,512gb,"Latest generation (~9.3GB)"
+deepseek-r1:14b,24gb,512gb,"Excellent reasoning model (~9GB)"
+qwen2.5-coder:14b,24gb,512gb,"Best coding model under 20GB (~9GB)"
+gpt-oss:20b,24gb,512gb,"OpenAI's open-weight model for local use (~14GB)"
+qwen3:30b,48gb,512gb,"MoE, only 3B active params (~19GB)"

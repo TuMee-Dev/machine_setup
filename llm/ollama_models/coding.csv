@@ -1,0 +1,4 @@
+model_name,minimum_memory,minimum_disk,description
+qwen2.5-coder:14b,32gb,512gb,"Best coding model under 20GB (~9GB)"
+qwen2.5-coder:32b,48gb,1tb,"Elite large coding model (~20GB)"
+gpt-oss:20b,24gb,512gb,"Strong coding with reasoning (~14GB)"

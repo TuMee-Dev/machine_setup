@@ -1,0 +1,7 @@
+model_name,minimum_memory,minimum_disk,description
+qwen2.5:32b,48gb,1tb,"Very capable, still efficient (~20GB)"
+qwen3:32b,48gb,1tb,"Latest generation (~20GB)"
+cogito:32b,48gb,1tb,"Top-tier reasoning at size (~20GB)"
+qwq:32b,48gb,1tb,"Reasoning specialist (~20GB)"
+qwen3-vl:32b,48gb,1tb,"State-of-the-art vision-language (~20GB)"
+gemma2:27b,48gb,1tb,"High quality (~16GB)"

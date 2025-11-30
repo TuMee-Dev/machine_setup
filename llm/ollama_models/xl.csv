@@ -1,0 +1,6 @@
+model_name,minimum_memory,minimum_disk,description
+llama3.3:70b,64gb,2tb,"Matches llama3.1:405b performance (~40GB)"
+cogito:70b,96gb,2tb,"Beats DeepSeek/Qwen counterparts (~43GB)"
+deepseek-r1:70b,96gb,2tb,"Outstanding reasoning (~40GB)"
+qwen2.5:72b,96gb,2tb,"Excellent multilingual + reasoning (~43GB)"
+llama4:scout,96gb,2tb,"10M context, native multimodal, MoE (~67GB)"

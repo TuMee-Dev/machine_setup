@@ -1,0 +1,8 @@
+model_name,minimum_memory,minimum_disk,description
+cogito:3b,8gb,256gb,"Hybrid reasoning, beats Llama/Qwen at size (~2.2GB)"
+qwen3:4b,8gb,256gb,"Latest gen, outperforms Qwen2.5-72B (~2.5GB)"
+qwen2.5:7b,8gb,256gb,"Exceptional multilingual reasoning, coding (~4.7GB)"
+mistral:7b,8gb,256gb,"Reliable general-purpose model (~4.1GB)"
+cogito:8b,16gb,256gb,"Best small hybrid reasoning model (~4.9GB)"
+qwen3:8b,16gb,256gb,"Latest generation small model (~5.2GB)"
+gemma2:9b,16gb,256gb,"Google's efficient model, strong performance (~5.4GB)"

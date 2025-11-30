@@ -1,0 +1,8 @@
+model_name,minimum_memory,minimum_disk,description
+cogito:8b,16gb,256gb,"Hybrid reasoning, can self-reflect (~4.9GB)"
+phi4:14b,32gb,512gb,"Microsoft reasoning specialist (~8GB)"
+deepseek-r1:14b,32gb,512gb,"Small high-quality R1 variant (~9GB)"
+cogito:32b,48gb,1tb,"Best open reasoning at size (~20GB)"
+qwq:32b,48gb,1tb,"Reasoning specialist (~20GB)"
+cogito:70b,96gb,2tb,"Top-tier hybrid reasoning (~43GB)"
+deepseek-r1:70b,96gb,2tb,"Near-O3 performance (~40GB)"

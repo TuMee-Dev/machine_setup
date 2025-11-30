@@ -6,9 +6,9 @@ set -eo pipefail
 CORE_COUNT=$(sysctl -n hw.ncpu)
 export OLLAMA_DOWNLOAD_CONN=$CORE_COUNT
 
-CSV_FILE="ollama.csv"
+CSV_DIR="ollama_models"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CSV_PATH="${SCRIPT_DIR}/${CSV_FILE}"
+CSV_PATH="${SCRIPT_DIR}/${CSV_DIR}"
 
 # Color output
 RED='\033[0;31m'
@@ -160,26 +160,43 @@ pull_model_with_retry() {
     done
 }
 
-# Parse CSV and return list of eligible models
+# Get all CSV files in the models directory
+get_csv_files() {
+    find "$CSV_PATH" -name "*.csv" -type f 2>/dev/null | sort
+}
+
+# Parse all CSVs and return list of eligible models (deduped)
 get_eligible_models() {
     local -a models=()
     typeset -A seen_models  # Track unique models to avoid duplicates
 
-    while IFS=, read -r category model_name min_memory min_disk description; do
-        # Skip comments, empty lines, and header
-        [[ "$category" =~ ^#.*$ ]] && continue
-        [[ -z "$category" ]] && continue
-        [[ "$category" == "category" ]] && continue
+    local csv_files=$(get_csv_files)
 
-        # Skip if we've already seen this model
-        [[ -n "${seen_models[$model_name]}" ]] && continue
+    if [[ -z "$csv_files" ]]; then
+        return
+    fi
 
-        # Verify system requirements
-        if verify_system_requirements "$min_memory" "$min_disk" "$model_name"; then
-            models+=("$model_name|$min_disk")
-            seen_models[$model_name]=1
-        fi
-    done < "$CSV_PATH"
+    while IFS= read -r csv_file; do
+        [[ -z "$csv_file" ]] && continue
+
+        local category_name=$(basename "$csv_file" .csv)
+        log_info "Processing: $category_name.csv" >&2
+
+        while IFS=, read -r model_name min_memory min_disk description; do
+            # Skip header and empty lines
+            [[ "$model_name" == "model_name" ]] && continue
+            [[ -z "$model_name" ]] && continue
+
+            # Skip if we've already seen this model
+            [[ -n "${seen_models[$model_name]}" ]] && continue
+
+            # Verify system requirements
+            if verify_system_requirements "$min_memory" "$min_disk" "$model_name"; then
+                models+=("$model_name|$min_disk")
+                seen_models[$model_name]=1
+            fi
+        done < "$csv_file"
+    done <<< "$csv_files"
 
     if [[ ${#models[@]} -gt 0 ]]; then
         printf '%s\n' "${models[@]}"
@@ -191,19 +208,44 @@ get_installed_models() {
     ollama list | tail -n +2 | awk '{print $1}' | grep -v '^$'
 }
 
-# Remove models not in CSV
-remove_unlisted_models() {
+# Get all models from all CSVs (for cleanup comparison)
+get_all_csv_models() {
     local -a csv_models=()
+    typeset -A seen_models
 
-    log_info "Checking for models not in CSV..."
+    local csv_files=$(get_csv_files)
 
-    # Get all models from CSV
-    while IFS=, read -r category model_name min_memory min_disk description; do
-        [[ "$category" =~ ^#.*$ ]] && continue
-        [[ -z "$category" ]] && continue
-        [[ "$category" == "category" ]] && continue
-        csv_models+=("$model_name")
-    done < "$CSV_PATH"
+    if [[ -z "$csv_files" ]]; then
+        return
+    fi
+
+    while IFS= read -r csv_file; do
+        [[ -z "$csv_file" ]] && continue
+
+        while IFS=, read -r model_name min_memory min_disk description; do
+            # Skip header and empty lines
+            [[ "$model_name" == "model_name" ]] && continue
+            [[ -z "$model_name" ]] && continue
+
+            # Skip if we've already seen this model
+            [[ -n "${seen_models[$model_name]}" ]] && continue
+
+            csv_models+=("$model_name")
+            seen_models[$model_name]=1
+        done < "$csv_file"
+    done <<< "$csv_files"
+
+    if [[ ${#csv_models[@]} -gt 0 ]]; then
+        printf '%s\n' "${csv_models[@]}"
+    fi
+}
+
+# Remove models not in any CSV
+remove_unlisted_models() {
+    log_info "Checking for models not in any CSV..."
+
+    # Get all models from all CSVs
+    local csv_models=$(get_all_csv_models)
 
     # Get installed models
     local installed_models=$(get_installed_models)
@@ -214,12 +256,12 @@ remove_unlisted_models() {
         [[ -z "$installed_model" ]] && continue
 
         local found=false
-        for csv_model in "${csv_models[@]}"; do
+        while IFS= read -r csv_model; do
             if [[ "$installed_model" == "$csv_model" ]]; then
                 found=true
                 break
             fi
-        done
+        done <<< "$csv_models"
 
         if [[ "$found" == false ]]; then
             to_remove+=("$installed_model")
@@ -231,13 +273,14 @@ remove_unlisted_models() {
         return 0
     fi
 
-    log_warning "Found ${#to_remove[@]} model(s) not in CSV:"
+    log_warning "Found ${#to_remove[@]} model(s) not in any CSV:"
     for model in "${to_remove[@]}"; do
         echo "  - $model"
     done
 
     echo ""
-    read -p "Remove these models? (y/N): " -n 1 -r
+    echo -n "Remove these models? (y/N): "
+    read -k 1 REPLY
     echo ""
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -268,7 +311,7 @@ main() {
             *)
                 log_error "Unknown option: $1"
                 echo "Usage: $0 [--cleanup]"
-                echo "  --cleanup: Remove models not in CSV"
+                echo "  --cleanup: Remove models not in any CSV"
                 exit 1
                 ;;
         esac
@@ -279,11 +322,19 @@ main() {
     log_info "OLLAMA_DOWNLOAD_CONN set to: $OLLAMA_DOWNLOAD_CONN concurrent connections"
     echo ""
 
-    # Check if CSV exists
-    if [[ ! -f "$CSV_PATH" ]]; then
-        log_error "CSV file not found: $CSV_PATH"
+    # Check if CSV directory exists
+    if [[ ! -d "$CSV_PATH" ]]; then
+        log_error "CSV directory not found: $CSV_PATH"
         exit 1
     fi
+
+    # Check for CSV files
+    local csv_count=$(get_csv_files | wc -l | tr -d ' ')
+    if [[ "$csv_count" -eq 0 ]]; then
+        log_error "No CSV files found in: $CSV_PATH"
+        exit 1
+    fi
+    log_info "Found $csv_count CSV file(s) in $CSV_DIR/"
 
     # Check if ollama is installed
     if ! command -v ollama &> /dev/null; then
@@ -303,7 +354,7 @@ main() {
     echo ""
 
     # Get eligible models
-    log_info "Analyzing models from CSV..."
+    log_info "Analyzing models from all CSVs..."
     local eligible_models=$(get_eligible_models)
 
     if [[ -z "$eligible_models" ]]; then
@@ -312,7 +363,7 @@ main() {
     fi
 
     local model_count=$(echo "$eligible_models" | wc -l | tr -d ' ')
-    log_info "Found $model_count eligible model(s) for this system"
+    log_info "Found $model_count eligible model(s) for this system (deduped)"
 
     # Download models
     local downloaded_count=0

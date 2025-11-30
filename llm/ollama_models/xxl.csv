@@ -1,0 +1,6 @@
+model_name,minimum_memory,minimum_disk,description
+mixtral:8x22b,96gb,2tb,"MoE architecture, extremely powerful (~80GB)"
+mistral-large:123b,96gb,2tb,"Mistral's flagship (~70GB)"
+qwen3:235b,192gb,4tb,"Flagship, matches o3-mini performance (~142GB)"
+gpt-oss:120b,96gb,2tb,"OpenAI's open-weight production model (~65GB)"
+llama4:maverick,192gb,4tb,"400B MoE, 1M context, multimodal (~245GB)"
